@@ -372,7 +372,7 @@ Calendar.prototype = {
   close:function(noback){
     //"bounceOutDown   
     Calendar.prototype.run=true;
-   
+     removeEvent(document.documentElement,this.events.touchmove,this.fixMove);
     removeClass(this.target,this.classNames.enter);
     addClass(this.target,this.classNames.out);
     setTimeout(function(){
@@ -387,13 +387,14 @@ Calendar.prototype = {
 
    
   },
+  fixMove:function(e){
+     e.preventDefault();
+  },
   /**
   * 绑定事件 
   */
   bind: function() {
-    addEvent(document.documentElement,this.events.touchmove,function(e){
-        e.preventDefault();
-    });
+    addEvent(document.documentElement,this.events.touchmove,this.fixMove);
 
     addEvent(this.target, this.events.touchstart, function(e){
       this.touchstart(e);

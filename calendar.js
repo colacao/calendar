@@ -17,6 +17,7 @@
 * @class Calendar
 * @author colacao <cy14477@ly.com>
 */
+
 var Calendar = function(options) {
   if(Calendar.prototype.run) return;
 
@@ -26,7 +27,7 @@ var Calendar = function(options) {
      * 可用日期范围
      * @type {Array}
      */
-    range:[],
+    range: [],
     /**
     * 起始日期
     * @cfg {Date} date
@@ -86,7 +87,7 @@ var Calendar = function(options) {
     * @cfg {Object} template
     */
     template: {
-    	header:'<h3 class="float-header"></h3>',
+      header:'<h3 class="float-header"></h3>',
       parent: '<ul class="calendar-header"><li class="sunday">日</li><li>一</li><li>二</li><li>三</li><li>四</li><li>五</li> <li class="saturday">六</li></ul>',
       wrappers:"<div class='calendars-wrapper' id='calendars-wrapper'>{$wrapper}</div>",
       wrapper: '{$calendar}',
@@ -104,7 +105,7 @@ var Calendar = function(options) {
     * @cfg {Object} classNames
     */
     classNames: {
-    	all:"calendars",
+      all:"calendars",
       sunday: "sunday",
       disabled:"disabled",
       saturday: "saturday",
@@ -210,9 +211,9 @@ var Calendar = function(options) {
   var self = this;
   addEvent(window,"hashchange",function(){
      if(location.hash==""){
-     self.close(true);
-    }
-  });
+      self.close(true);
+     }
+  })
 }
 Calendar.prototype = {
   /**
@@ -223,7 +224,6 @@ Calendar.prototype = {
     this.setOptions(options);
     this.render();
     this.bind();
-
     location.hash="calContainer";
   },
    /**
@@ -250,11 +250,11 @@ Calendar.prototype = {
 
     this.select  = this.select?new Date(this.select.replace(/-/g,"\/") +" 0:00:00"):"";
 
-    // var t  = new Date(this.select.replace(/-/g,"\/"));
+    // var t  = new Date(this.select.replace(/-/g,"\/")+" 0:00:00");
     // if(!t.getDate()){
     //   this.select = null;
     // }
-
+  
     this.range = (this.range||[]).map(function(item){
       return new Date(item+" 0:00:00");
     })
@@ -372,20 +372,19 @@ Calendar.prototype = {
   close:function(noback){
     //"bounceOutDown   
     Calendar.prototype.run=true;
-     removeEvent(document.documentElement,this.events.touchmove,this.fixMove);
+    //history.back();
     removeClass(this.target,this.classNames.enter);
     addClass(this.target,this.classNames.out);
+    removeEvent(this.target,this.events.touchmove,this.fixMove);
+
     setTimeout(function(){
       this.target.parentNode && this.target.parentNode.removeChild(this.target);
-      // this.target = null;
-      // this.wrapper = null;
+      this = null;
       Calendar.prototype.run=false;
-      //if(!noback){
+      if(!noback){
         history.back();
-      //}
-   }.bind(this),400)
-
-   
+      }
+    }.bind(this),400)
   },
   fixMove:function(e){
      e.preventDefault();
@@ -394,7 +393,7 @@ Calendar.prototype = {
   * 绑定事件 
   */
   bind: function() {
-    addEvent(document.documentElement,this.events.touchmove,this.fixMove);
+    addEvent(this.target,this.events.touchmove,this.fixMove);
 
     addEvent(this.target, this.events.touchstart, function(e){
       this.touchstart(e);
@@ -446,12 +445,11 @@ Calendar.prototype = {
 
     returnValue += (day == 0) ? " " + this.classNames.sunday : (day == 6) ?  " " + this.classNames.saturday : "";
 
-     
     if(+date == +this.range[0] && !this.select){
        returnValue += this.classNames.select;
     }
     //58
-    if(this.range.length && (+date<+this.range[0] || +date>+this.range[1])){
+    if(this.range.length && (+date<+this.range[0] || +date>+this.range[1])){ 
       returnValue += " "+this.classNames.disabled;
     }
 
@@ -561,14 +559,14 @@ Calendar.prototype = {
     var t = this.create(this.date);
     var _tempwrapper = document.getElementById(this.id)||document.createElement("div");
      _tempwrapper.style.height = this.winHeight() + 'px';
-      _tempwrapper.style.width = this.winWidth() + 'px';
+     _tempwrapper.style.width = this.winWidth() + 'px';
     _tempwrapper.className = this.classNames.all;
     _tempwrapper.innerHTML =  t;
     _tempwrapper.id = this.classNames.all;
     var h = document.createElement("div");
     h.innerHTML = this.template.header;
-	
-	  var h2 = document.createElement("div");
+  
+    var h2 = document.createElement("div");
     h2.innerHTML = this.craeteTips().replaceWith({
       parent:this.template.parent
     });
@@ -586,18 +584,17 @@ Calendar.prototype = {
     this.target = _tempwrapper;
    
     //败笔，要计算提示的高度
-    addClass(_tempwrapper,this.classNames.enter);
+    //addClass(_tempwrapper,this.classNames.enter);
     var fixHeight = _tempwrapper.childNodes[2].offsetHeight;
-
     _tempwrapper.childNodes[0].style.paddingTop = fixHeight +'px';
     _tempwrapper.childNodes[1].style.top = fixHeight+'px';
     this.onCreate(this.target);
 
-   
+    addClass(_tempwrapper,this.classNames.enter);
     Calendar.prototype.run=true;
     setTimeout(function(){
       Calendar.prototype.run=false;
-    }.bind(this),400)
+    }.bind(this),400);
+
   }
 }
-

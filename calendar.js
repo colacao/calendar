@@ -23,6 +23,11 @@ var Calendar = function(options) {
   var defaults = {
     id:"__calendars__",
     /**
+     * 可用日期范围
+     * @type {Array}
+     */
+    range:["2015-12-17","2016-2-15"],
+    /**
     * 起始日期
     * @cfg {Date} date
     */
@@ -64,7 +69,7 @@ var Calendar = function(options) {
     * @cfg {Object} tips
     */
     tips: {
-      text: "<p>今天是{$month}月{$day}号，可购买{$month_end}月{$day_end}日的火车票</p>",
+      text: "<p class='buyDate'>今天是{$month}月{$day}号，可购买{$month_end}月{$day_end}日的火车票</p>",
       level: 1
     },
     /**
@@ -115,15 +120,68 @@ var Calendar = function(options) {
     * @cfg {Object} festival
     */
     festival: {
-      "2015-1-1":["元旦",0],
+      "2015-1-1":["元旦",3],
       "2015-2-18":["春节",7],
-      '2015-4-4':["清明节",0],
+      '2015-4-4':["清明",0],
       '2015-5-1':["劳动节",0],
-      '2015-6-20':["端午节",0],
+      '2015-6-20':["端午",0],
       '2015-9-3':["胜利日",0],
-      '2015-9-26':["中秋节",2],
-      "2015-10-1":["国庆节",7],
-      "2016-2-6":["春节",8],
+      '2015-9-26':["中秋",2],
+      "2015-10-1":["国庆",7],
+      "2016-2-7":["除夕",0],
+      "2016-2-8":["春节",6],
+      "2016-2-14":["情人节",1],
+      "2016-2-22":["元宵节",0],
+      "2016-4-4":["清明节",0],
+      "2016-6-9":["端午节",0],
+      "2016-8-9":["七夕",0],
+      "2016-9-15":["中秋节",2],
+      "2016-10-1":["国庆节",7],
+      "2016-10-19":["重阳节",0],
+      "2017-1-27":["除夕",0],
+      "2017-1-28":["春节",7],
+      "2017-2-11":["元宵节",0],
+      "2017-4-4":["清明节",0],
+      "2017-5-30":["端午节",0],
+      "2017-8-28":["七夕",0],
+      "2017-10-1":["国庆节",7],
+      "2017-10-4":["中秋节",2],
+      "2017-10-28":["重阳节",0],
+      "2018-2-15":["除夕",0],
+      "2018-2-16":["春节",7],
+      "2018-3-2":["元宵节",0],
+      "2018-4-5":["清明节",0],
+      "2018-6-18":["端午节",0],
+      "2018-8-17":["七夕",0],
+      "2018-9-24":["中秋节",2],
+      "2018-10-1":["国庆节",7],
+      "2018-10-17":["重阳节",0],
+      "2019-2-4":["除夕",0],
+      "2019-2-5":["春节",7],
+      "2019-2-19":["元宵节",0],
+      "2019-4-5":["清明节",0],
+      "2019-6-7":["端午节",0],
+      "2019-8-7":["七夕",0],
+      "2019-9-13":["中秋节",2],
+      "2019-10-1":["国庆节",7],
+      "2019-10-7":["重阳节",0],
+      "2020-1-24":["除夕",0],
+      "2020-1-25":["春节",7],
+      "2020-2-8":["元宵节",0],
+      "2020-4-4":["清明节",0],
+      "2020-6-25":["端午节",0],
+      "2020-8-25":["七夕",0],
+      "2020-10-1":["中秋节",2],
+      "2020-10-25":["重阳",0],
+      "2016-1-1":["元旦",3],
+      "2017-1-1":["元旦",3],
+      "2018-1-1":["元旦",3],
+      "2019-1-1":["元旦",3],
+      "2020-1-1":["元旦",3],
+      "2017-2-14":["情人节",0],
+      "2018-2-14":["情人节",0],
+      "2019-2-14":["情人节",0],
+      "2020-2-14":["情人节",0],
     },
     /**
      * 检查日期是否可选
@@ -148,19 +206,13 @@ var Calendar = function(options) {
     onCreate:function(){}
   }
   var opt = extend(defaults, options);
-  // window["t_"+opt.classNames.all+"_p"]=opt;
-  // location.hash="#"+opt.classNames.all;
-  //   window.onhashchange = function(e) {
-  //       console.log(location.hash,e.newURL,e.oldURL);
-  //       if(e.oldURL.match(/calendars/)){
-  //         this.close();
-  //       }
-  //       if(e.newURL.match(/calendars/)){
-  //         new Calendar(window["t_"+this.classNames.all+"_p"]);
-  //         return;
-  //       }
-  //   }.bind(this); 
   this.initialize(opt);
+  var self = this;
+  addEvent(window,"hashchange",function(){
+     if(location.hash==""){
+     self.close(true);
+    }
+  });
 }
 Calendar.prototype = {
   /**
@@ -171,6 +223,8 @@ Calendar.prototype = {
     this.setOptions(options);
     this.render();
     this.bind();
+
+    location.hash="calContainer";
   },
    /**
    * 设置初始值
@@ -178,7 +232,12 @@ Calendar.prototype = {
    */
   setOptions: function(options) {
     extend(this, options);
-    var t1  = new Date(this.date);
+      var t1  = new Date(this.date);
+      if(this.date && typeof(this.date)=="object"){
+          t1 = this.date;
+      }else{
+        t1 = new Date(this.date.replace(/-/g,"\/"));
+      }
     if(t1.getDate()){
       this.date = t1;
     }else{
@@ -188,10 +247,17 @@ Calendar.prototype = {
     this.date.setMinutes(0);
     this.date.setSeconds(0);
     this.date.setMilliseconds(0);
-    var t  = new Date(this.select);
-    if(!t.getDate()){
-      this.select = null;
-    }
+
+    this.select  =  new Date(this.select +" 0:00:00");
+
+    // var t  = new Date(this.select.replace(/-/g,"\/"));
+    // if(!t.getDate()){
+    //   this.select = null;
+    // }
+
+    this.range = (this.range||[]).map(function(item){
+      return new Date(item+" 0:00:00");
+    })
   },
   /**
    * 计划两个日期相差的月数
@@ -303,17 +369,22 @@ Calendar.prototype = {
   /**
    * 关闭日历
    */
-  close:function(){
+  close:function(noback){
     //"bounceOutDown   
     Calendar.prototype.run=true;
+   
     removeClass(this.target,this.classNames.enter);
     addClass(this.target,this.classNames.out);
     setTimeout(function(){
-      this.target.parentNode.removeChild(this.target);
-      this.target = null;
-      this.wrapper = null;
+      this.target.parentNode && this.target.parentNode.removeChild(this.target);
+      // this.target = null;
+      // this.wrapper = null;
       Calendar.prototype.run=false;
+      //if(!noback){
+        history.back();
+      //}
    }.bind(this),400)
+
    
   },
   /**
@@ -359,17 +430,30 @@ Calendar.prototype = {
     var fest = this.festival[tempDateStr];
 
     if(!this.select){
-       returnValue = classList[tempDay] || "";
-    }else if(this.select && tempDateStr == this.select){
+       returnValue = this.range.length?"":(classList[tempDay] || "");
+    }else if(this.select && +date == +this.select){
       returnValue += this.classNames.select;
     }
+
     if(fest && fest.length<=2){
         returnValue += " "+this.classNames.festival;
     }
+
     if(tempDay+1<=0 || tempDay>this.days){
       returnValue += " "+this.classNames.disabled;
     }
-    returnValue += (day == 0) ? " " + this.classNames.sunday : (day == 6) ?  " " + this.classNames.saturday : ""
+
+    returnValue += (day == 0) ? " " + this.classNames.sunday : (day == 6) ?  " " + this.classNames.saturday : "";
+
+     
+    if(+date == +this.range[0] && !this.select){
+       returnValue += this.classNames.select;
+    }
+    //58
+    if(this.range.length && (+date<+this.range[0] || +date>+this.range[1])){
+      returnValue += " "+this.classNames.disabled;
+    }
+
     return {
       'class': returnValue.trim()
     };
@@ -402,10 +486,15 @@ Calendar.prototype = {
           var pDay = this.getDateString(_tempDate);
           this.festival[pDay]=[fest[0],fest[1]-i,true];
       }
+
       var tip = this.template.tip["假"];
-      ret = tip.replaceWith({
-        type:"假"
-      })+(fest.length==2?fest[0]:(today||day));
+      if(fest[1]>0){
+        ret = tip.replaceWith({
+          type:"假"
+        })+(fest.length==2?fest[0]:(today||day));
+      }else{
+        ret = fest[0];
+      }
     }else if(!ret){
       ret= today||day;
     }
@@ -446,7 +535,11 @@ Calendar.prototype = {
     var classList = [this.classNames.today, this.classNames.tomorrow, this.classNames.aftertomorrow];
     var tempDay = Math.round(((date - this.date) / (86400000)));
     var ret = this.todayInfos[tempDay] || "";
-    return ret;
+    // if(this.range.length){
+    //   return "";
+    // }else{
+      return ret;
+    //}
   },
   /**
    * 获取屏幕高度
@@ -456,6 +549,10 @@ Calendar.prototype = {
       var _h = window.innerHeight
       return ((_h > 0) ? _h :screen.height);
   },
+  winWidth:function(){
+     var _w = window.innerWidth
+     return ((_w > 0) ? _w :screen.width);
+  },
   /**
    * 渲染
    */
@@ -463,6 +560,7 @@ Calendar.prototype = {
     var t = this.create(this.date);
     var _tempwrapper = document.getElementById(this.id)||document.createElement("div");
      _tempwrapper.style.height = this.winHeight() + 'px';
+      _tempwrapper.style.width = this.winWidth() + 'px';
     _tempwrapper.className = this.classNames.all;
     _tempwrapper.innerHTML =  t;
     _tempwrapper.id = this.classNames.all;
@@ -487,13 +585,14 @@ Calendar.prototype = {
     this.target = _tempwrapper;
    
     //败笔，要计算提示的高度
-   
+    addClass(_tempwrapper,this.classNames.enter);
     var fixHeight = _tempwrapper.childNodes[2].offsetHeight;
+
     _tempwrapper.childNodes[0].style.paddingTop = fixHeight +'px';
     _tempwrapper.childNodes[1].style.top = fixHeight+'px';
     this.onCreate(this.target);
 
-    addClass(_tempwrapper,this.classNames.enter);
+   
     Calendar.prototype.run=true;
     setTimeout(function(){
       Calendar.prototype.run=false;

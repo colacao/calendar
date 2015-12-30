@@ -26,7 +26,7 @@ var Calendar = function(options) {
      * 可用日期范围
      * @type {Array}
      */
-    range:["2015-12-17","2016-2-15"],
+    range:[],
     /**
     * 起始日期
     * @cfg {Date} date
@@ -36,7 +36,7 @@ var Calendar = function(options) {
     * 在日历显示的选中日期
     * @cfg {Date} select
     */
-    select:null,
+    select:"",
     /**
     * 插入日历的元素
     * @cfg {HTMLElement} wrapper
@@ -248,7 +248,7 @@ Calendar.prototype = {
     this.date.setSeconds(0);
     this.date.setMilliseconds(0);
 
-    this.select  =  new Date(this.select +" 0:00:00");
+    this.select  = this.select?new Date(this.select.replace(/-/g,"\/") +" 0:00:00"):"";
 
     // var t  = new Date(this.select.replace(/-/g,"\/"));
     // if(!t.getDate()){

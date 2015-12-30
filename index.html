@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+  <title>日历4</title>
+  <META HTTP-EQUIV="Pragma" CONTENT="no-cache"> 
+  <META HTTP-EQUIV="Cache-Control" CONTENT="no-cache"> 
+  <META HTTP-EQUIV="Expires" CONTENT="0"> 
+    <meta content="telephone=no" name="format-detection" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0">
+  <script type="text/javascript" src="common.js"></script>
+  <script type="text/javascript" src="iscroll-lite.js"></script>
+   <script type="text/javascript" src="list.js"></script>
+  <script type="text/javascript" src="calendar.js"></script>
+<!-- <script src="debuggap.js" type="text/javascript"></script> -->
+  <link rel="stylesheet" type="text/css" href="calendar.css"> 
+  <script type="text/javascript">
+  window.onload = function() {
+    document.getElementById("BeginTime").addEventListener("click", function() {
+      new Calendar({
+        tips:{
+           text: "<p>今天是{$month}月{$day}号，可购买{$month_end}月{$day_end}日的火车票，树曾经自以为看透一切,其实一切才刚刚开始而已，树的生命中注定有叶子的经过，于是，叶子成了树前世未完成的缘。于是，在与叶子的相处时，树选择离开，选择迷失，选择逃避</p>"
+        },
+        days: document.getElementById('days').value * 1,
+        date: document.getElementById('date').value || new Date(),
+        type: document.getElementById('type').value,
+        select: document.getElementById("test").innerHTML,
+        onCreate: function(dom) {
+          new List({
+            floatContainer: document.querySelector(".float-header"),
+            Scroll: (function() {
+              var listeners = [];
+              var top;
+              var scroll = new iScroll("calendars", {
+                onScrollMove: function(e) {
+                  top = -this.y;
+
+
+                  listeners.forEach(function(fn) {
+                    fn.call(window);
+                  });
+                },
+                onScrollEnd: function() {
+                  if (document.querySelector(".float-header")) {
+                    document.querySelector(".float-header").style.opacity = 1;
+                  }
+                }
+              });
+              return {
+                onscroll: function(fn) {
+                  listeners.push(fn);
+                },
+                getScrollTop: function() {
+                  return top;
+                },
+                getOffsetTop: function(target) {
+                  return target.offsetTop;
+                }
+              }
+            })(),
+            targets: document.querySelectorAll(".calendars-wrapper h3")
+          })
+        },
+        canChange:function(date,el){
+          // console.log(date,el);
+          // this.close()
+          return true;
+        },
+        onChange: function(value) {
+          document.getElementById("test").innerHTML = (value);
+        }
+      });
+    }, false)
+  }
+  </script>
+</head>
+<body style="margin:5px;">
+  <label>日历类型:
+  <select id="type">
+    <option>抢</option>
+    <option>假</option>
+  </select>
+ </label>
+ <br>
+  <label>当前日期：
+  <input type="text" id="date" value="2015-12-8" >
+  </label>
+   <br>
+    <label>可用天数：
+
+  <input type="text" id="days" value="60"/>
+  </label>
+   <hr>
+ <div id="BeginTime" class="touchablelist fn-clear" style="border:solid 1px #999">
+      <p class="levdatetext" id="test1">点击选择出发日期<span id="test"></span></p>
+  </div>
+</body>
+</html>

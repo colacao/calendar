@@ -379,7 +379,7 @@ Calendar.prototype = {
 
     setTimeout(function(){
       this.target.parentNode && this.target.parentNode.removeChild(this.target);
-      this = null;
+      //this = null;
       Calendar.prototype.run=false;
       if(!noback){
         history.back();
